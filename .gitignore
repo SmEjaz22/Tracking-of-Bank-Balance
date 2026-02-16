@@ -1,0 +1,6 @@
+/App/__pycache__
+/App/migrations/__pycache__
+/App/migrations
+/Bank/__pycache__
+/venv
+/db.sqlite3
