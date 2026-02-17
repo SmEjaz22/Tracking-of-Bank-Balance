@@ -5,6 +5,6 @@ from . import views
 app_name = "Bank"
 
 urlpatterns = [
-    path('Salary/<uuid:uuid>', views.get_salary, name='Salary'),
+    path('Totals/', views.get_total, name='Totals')
 ]
 

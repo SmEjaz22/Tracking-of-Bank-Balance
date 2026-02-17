@@ -1,0 +1,20 @@
+{{totals}}
+
+<h1>All Totals</h1>
+  <ul>
+      {% for item in totals %}
+          <li>
+              <!-- <a href="{% url 'Bank:Totals' %}"> -->
+              <!-- </a> -->
+              {{item.salary_set.first}}
+              <br>
+              {{item.saving_set.first}}
+              <br>
+              {{item.others_set.first}}
+<br>
+              <b>{{item}}</b>
+          </li>
+      {% empty %}
+          <li>No totals found</li>
+      {% endfor %}
+  </ul>

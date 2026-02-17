@@ -46,7 +46,7 @@ class Salary(models.Model):
     salary = models.IntegerField(validators=[MinValueValidator(0)])
     total = models.ForeignKey(Total, on_delete=models.CASCADE)
     def __str__(self):
-            return f"Salary is: {self.salary}"
+            return f"Salary saved is: {self.salary}"
     def get_absolute_url(self):
             from django.urls import reverse
             return reverse('Salary', args=[str(self.uuid)]) # 'salary' is the name from the App/urls.py under path.
