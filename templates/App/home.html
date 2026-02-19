@@ -1,20 +1,32 @@
-{{totals}}
+{{total_record}}
 
 <h1>All Totals</h1>
-  <ul>
-      {% for item in totals %}
-          <li>
-              <!-- <a href="{% url 'Bank:Totals' %}"> -->
-              <!-- </a> -->
-              {{item.salary_set.first}}
-              <br>
-              {{item.saving_set.first}}
-              <br>
-              {{item.others_set.first}}
-<br>
-              <b>{{item}}</b>
-          </li>
-      {% empty %}
-          <li>No totals found</li>
-      {% endfor %}
-  </ul>
+
+<h3>Salary: {{salaries.salary | default:0}}</h3>
+<span>
+    <a href="{% url 'Bank:ChangeSalary' total_record.uuid %}">
+        Change Salary
+    </a>
+  </span>
+<h3>Saving: {{savings.saving | default:0}}</h3> 
+<span> 
+<span>
+    <a href="{% url 'Bank:ChangeSaving' total_record.uuid %}">
+        Change Saving
+    </a>
+  </span>
+
+  <h3> Others: {{others.balance | default:0}}</h3>
+<span>
+    <a href="{% url 'Bank:ChangeOthers' total_record.uuid %}">
+      Change balance for "{{others.others}}"
+    </a>
+  </span>
+
+
+  <form method="post" action="{%url 'Account:logout' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Logout</button>
+</form>
+

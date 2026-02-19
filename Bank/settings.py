@@ -38,7 +38,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "App",
+    "Account"
 ]
+
+LOGIN_URL = 'Account:login'
+LOGIN_REDIRECT_URL = 'Bank:Dashboard'
+LOGOUT_REDIRECT_URL = 'Account:login'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

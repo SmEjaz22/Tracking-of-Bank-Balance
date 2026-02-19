@@ -4,3 +4,5 @@
 /Bank/__pycache__
 /venv
 /db.sqlite3
+/Account/__pycache__
+/Account/migrations

@@ -1,0 +1,15 @@
+{%if user.is_authenticated%}
+ <h1>Hello {{user.username}}</h1>
+<h4>This is your digital automated notepad.</h4>
+    <div>
+        {% if uuid %}
+            <a href="{% url 'Bank:Totals' uuid %}">
+                <h2>Go to your Pocket to manage your...</h2>
+            </a>
+        {% endif %}
+    </div>{%else%}
+<h1>Hello There!</h1>
+<h4>Login or Signup to use your digital automated notepad.</h4>
+
+{%endif%}
+

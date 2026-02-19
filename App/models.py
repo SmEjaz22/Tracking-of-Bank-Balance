@@ -1,10 +1,11 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Sum
 
+from django.contrib.auth.models import User
 import uuid
 # Create your models here
-from django.db.models import Sum
 
 def validateforNumeric(number):
     if not number.isdigit():
@@ -15,6 +16,8 @@ def validateforText(number):
         raise ValidationError("This field can not be only numbers.")
 
 class Total(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='totals')
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     def __str__(self):
         # uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -34,13 +37,15 @@ class Total(models.Model):
         # It has nothing to do with your model field named total
         
         calculated_total = salary_sum + saving_sum + others_sum
-        return f"Total balance is: {calculated_total}"
+        return f"Total balance for {self.user.username} is: {calculated_total}"
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('Total', args=[str(self.uuid)]) # 'total' is the name from the App/urls.py under path.
+        return reverse('Bank:Totals', args=[str(self.uuid)]) # 'Total' is the name from the App/urls.py under path.
 
 class Salary(models.Model):
+    class Meta:
+        verbose_name_plural = "Salaries"
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     salary = models.IntegerField(validators=[MinValueValidator(0)])
@@ -65,6 +70,8 @@ class Saving(models.Model):
 
 
 class Others(models.Model):
+    class Meta:
+        verbose_name_plural = "Others"
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     others = models.CharField(max_length=32, validators=[validateforText])

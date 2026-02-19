@@ -3,12 +3,24 @@ from .models import Salary, Saving, Others
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 
-import random
-import string
-
 class InputSalary(forms.ModelForm):
-    class meta:
+    class Meta:
         model = Salary
         fields = '__all__'
+        exclude = ['total']
+    # No need for overriding the save method ig.
+    # salary=forms.IntegerField(validators=[MinValueValidator(0)])
+    # def save(commit=True):
 
-    Salary=forms.IntegerField(validators=[MinValueValidator(0)])
+class InputSaving(forms.ModelForm):
+    class Meta:
+        model = Saving
+        fields = '__all__'
+        exclude = ['total']
+
+class InputOthers(forms.ModelForm):
+    class Meta:
+        model = Others
+        fields = '__all__'
+        exclude = ['total']
+
