@@ -10,6 +10,11 @@
     </div>{%else%}
 <h1>Hello There!</h1>
 <h4>Login or Signup to use your digital automated notepad.</h4>
+<a href="{% url 'Account:signup' %}">
+<button type="submit">Signup</button></a> / 
+
+<a href="{% url 'Account:login' %}">
+<button type="submit">Login</button></a>
 
 {%endif%}
 

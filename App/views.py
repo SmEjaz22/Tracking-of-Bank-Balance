@@ -12,9 +12,12 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 # @login_required
 def dashboard(request):
-    total, created = Total.objects.get_or_create(user=request.user)
-    uuid = total.uuid
-    context = {'uuid':uuid}
+    if request.user.is_authenticated:
+        total, created = Total.objects.get_or_create(user=request.user)
+        uuid = total.uuid
+        context = {'uuid':uuid}
+    else:
+        context = {'uuid':None}
     return render(request, 'App/dashbaord.html', context)
 
 @login_required
@@ -28,14 +31,14 @@ def get_total(request, uuid):
     savings = Saving.objects.filter(total=total_record).first()
     others = Others.objects.filter(total=total_record).first()
 
-    total_balance = total_record.__str__()  # This calls the __str__ method
+    # total_balance = total_record.__str__()  # This calls the __str__ method
     
     context = {
         'total_record': total_record,
         'salaries': salaries,
         'savings': savings,
         'others': others,
-        'total_balance': total_balance,
+        # 'total_balance': total_balance,
     }
 
     # context = {
