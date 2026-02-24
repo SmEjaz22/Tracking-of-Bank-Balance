@@ -19,7 +19,7 @@ def dashboard(request):
     else:
         context = {'uuid':None}
     return render(request, 'App/dashbaord.html', context)
-
+:
 @login_required
 def get_total(request, uuid):
 

@@ -38,7 +38,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "App",
-    "Account"
+    "Account",
+    'rest_framework',
+    'rest_framework.authtoken',  # For token authentication
+    'corsheaders',  # For mobile access
+    'api',
 ]
 
 LOGIN_URL = 'Account:login'
@@ -46,6 +50,7 @@ LOGIN_REDIRECT_URL = 'Bank:Dashboard'
 LOGOUT_REDIRECT_URL = 'Account:login'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -54,6 +59,20 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+
+# Allow your mobile app to connect
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost",  # For emulator testing
+    "http://10.0.2.2",   # For Android emulator
+]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 ROOT_URLCONF = "Bank.urls"
 

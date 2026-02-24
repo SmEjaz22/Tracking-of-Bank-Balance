@@ -6,3 +6,6 @@
 /db.sqlite3
 /Account/__pycache__
 /Account/migrations
+Frontend/kivy-debs-build/
+/api/migrations
+/api/migrations/__pycache__
