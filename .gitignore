@@ -9,3 +9,4 @@
 Frontend/kivy-debs-build/
 /api/migrations
 /api/migrations/__pycache__
+/api/__pycache__
