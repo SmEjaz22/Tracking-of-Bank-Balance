@@ -1,64 +1,121 @@
 import kivy
 from kivy.core import text
 from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
 from kivy.lang import Builder
+from kivy.properties import StringProperty
 
 # kivy.require("2.3.1")
 
-Builder.load_file("firstappofmine.kv")  # Adds the .kv file path here,
-# class MygridLayout(Widget):
+# Practicing
 
 
-class Login(GridLayout):
-    # Comment the __init__ after the creation of .kv file.
-    def __init__(self, **kwargs):
-        super(Login, self).__init__(**kwargs)
+class BoxLayoutExample(BoxLayout):
+    pass
 
-        self.cols = 1
-        self.add_widget(Label(text="User Name"))
-        self.username = TextInput()
-        self.add_widget(self.username)
 
-        self.add_widget(Label(text="Password"))
-        self.password = TextInput(password=True)
-        self.add_widget(self.password)
+class GridLayoutExample(GridLayout):
+    # gridlayout doesnot allow the pos_hint values in kv file. But uses the cols/rows feature. Otherwise the things will override eachother.
+    pass
 
-        # Create a submit button
-        self.submit = Button(text="Login")
+    mytotal = StringProperty("My Total:")
+    mytotalvalue = StringProperty("____")
+    mysalary = StringProperty()
+    mysaving = StringProperty()
+    myothers = StringProperty()
 
-        # Make button bind
-        self.submit.bind(
-            on_press=self.ProcessLogin
-        )  # When binding things we are passing an instance
+    def showtotal(self):
+        if "____" in self.mytotalvalue:
+            self.mytotalvalue = "2000"
+        else:
+            self.mytotalvalue = "____"
 
-        self.add_widget(self.submit)
+    def showsalary(self):
+        if not self.mysalary:
+            self.mysalary = "900$"
+        else:
+            self.mysalary = ""
 
-        self.error = Label(text="")
-        self.add_widget(self.error)
+    def showsaving(self):
+        if not self.mysaving:
+            self.mysaving = "900$"
+        else:
+            self.mysaving = ""
 
-    def ProcessLogin(self, instance):
-        self.error.text = ""  # clear previous messages
-
-        if not self.username.text or not self.password.text:
-            self.error.text = "Please fill the login form"
-            return False
-        self.error.text = f"Logging {self.username.text} in..."
-        return True
+    def showothers(self):
+        if not self.myothers:
+            self.myothers = "900$"
+        else:
+            self.myothers = ""
 
 
 class FirstAppOfMine(App):
     def build(self):
-        return Login()
+        return GridLayoutExample()
+        # return BoxLayoutExample()
+
+        # Class rule only (<ClassName>) + Python returns instance
+        # Root rule only (ClassName:) + Python returns nothing
 
 
 if __name__ == "__main__":
     FirstAppOfMine().run()
 
+
+# Builder.load_file("firstappofmine.kv")  # Adds the .kv file path here,
+# # class MygridLayout(Widget):
+#
+#
+# class Login(GridLayout):
+#     # Comment the __init__ after the creation of .kv file.
+#     def __init__(self, **kwargs):
+#         super(Login, self).__init__(**kwargs)
+#
+#         self.cols = 1
+#         self.add_widget(Label(text="User Name"))
+#         self.username = TextInput()
+#         self.add_widget(self.username)
+#
+#         self.add_widget(Label(text="Password"))
+#         self.password = TextInput(password=True)
+#         self.add_widget(self.password)
+#
+#         # Create a submit button
+#         self.submit = Button(text="Login")
+#
+#         # Make button bind
+#         self.submit.bind(
+#             on_press=self.ProcessLogin
+#         )  # When binding things we are passing an instance
+#
+#         self.add_widget(self.submit)
+#
+#         self.error = Label(text="")
+#         self.add_widget(self.error)
+#
+#     def ProcessLogin(self, instance):
+#         self.error.text = ""  # clear previous messages
+#
+#         if not self.username.text or not self.password.text:
+#             self.error.text = "Please fill the login form"
+#             return False
+#         self.error.text = f"Logging {self.username.text} in..."
+#         return True
+#
+#
+# class FirstAppOfMine(App):
+#     def build(self):
+#         return Login()
+#
+#
+# if __name__ == "__main__":
+#     FirstAppOfMine().run()
+#
 
 # """
 # Pocket App - Personal Finance Manager
