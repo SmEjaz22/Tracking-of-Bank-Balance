@@ -1,9 +1,10 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Total, Salary, Saving, Others
+from .models import Pocket, Transaction, PatternRule, DeviceToken
 
-admin.site.register(Total)
-admin.site.register(Salary)
-admin.site.register(Saving)
-admin.site.register(Others)
+admin.site.register(Pocket)
+admin.site.register(Transaction)
+admin.site.register(PatternRule)
+admin.site.register(DeviceToken)
+

@@ -10,3 +10,12 @@ Frontend/kivy-debs-build/
 /api/migrations
 /api/migrations/__pycache__
 /api/__pycache__
+
+__pycache__/
+*.pyc
+*.pyo
+.env
+Frontend/.buildozer/
+Frontend/bin/
+Frontend/__pycache__/
+Frontend/*.pyc

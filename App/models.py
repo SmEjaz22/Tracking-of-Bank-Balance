@@ -1,90 +1,190 @@
-from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+import uuid
 from django.db import models
+from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 from django.db.models import Sum
 
-from django.contrib.auth.models import User
-import uuid
-# Create your models here
 
-def validateforNumeric(number):
-    if not number.isdigit():
-        raise ValidationError("This field can be only numbers.")
+# ---------------------------------------------------------------------------
+# Pocket
+# ---------------------------------------------------------------------------
 
-def validateforText(number):
-    if (number.isdigit()):
-        raise ValidationError("This field can not be only numbers.")
+class PocketType(models.TextChoices):
+    SALARY  = 'salary',  'Salary'
+    SAVING  = 'saving',  'Saving'
+    CUSTOM  = 'custom',  'Custom'
 
-class Total(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='totals')
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
+class Pocket(models.Model):
+    """
+    A named money container belonging to one user.
+    Replaces the old Total / Salary / Saving / Others split.
+    """
+    id           = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user         = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pockets')
+    name         = models.CharField(max_length=64)                  # e.g. "Salary", "Travel fund"
+    pocket_type  = models.CharField(max_length=16, choices=PocketType.choices, default=PocketType.CUSTOM)
+    balance      = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    budget_limit = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(0)])
+    is_archived  = models.BooleanField(default=False)
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
 
     def __str__(self):
-        # uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-        # total = models.IntegerField(validators=[MinValueValidator(0)])
-        # Calculate sum of all related records
-        salary_sum = self.salary_set.all().aggregate(total=Sum('salary'))['total'] or 0
-        saving_sum = self.saving_set.all().aggregate(total=Sum('saving'))['total'] or 0
-        others_sum = self.others_set.all().aggregate(total=Sum('balance'))['total'] or 0
-        # When you run:
-        #
-        # self.salary_set.aggregate(total=Sum('salary'))
-        #
-        # It returns a dictionary:
-        # {'total': 5000}  # The sum is stored under key 'total'
-        # The key 'total' is the name you gave it in the aggregate function
-        #
-        # It has nothing to do with your model field named total
-        
-        calculated_total = salary_sum + saving_sum + others_sum
-        return f"Total balance for {self.user.username} is: {calculated_total}"
+        return f"{self.name} ({self.user.username}) — Rs {self.balance:,}"
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('Bank:Totals', args=[str(self.uuid)]) # 'Total' is the name from the App/urls.py under path.
+        return reverse('Bank:Pocket', args=[str(self.id)])
 
-class Salary(models.Model):
+    # ------------------------------------------------------------------
+    # Convenience: recalculate balance from transaction log at any time.
+    # Useful if you ever suspect the balance field drifted.
+    # ------------------------------------------------------------------
+    def recalculate_balance(self):
+        credits = self.transactions.filter(direction=Direction.CREDIT).aggregate(
+            total=Sum('amount'))['total'] or 0
+        debits  = self.transactions.filter(direction=Direction.DEBIT).aggregate(
+            total=Sum('amount'))['total'] or 0
+        self.balance = credits - debits
+        self.save(update_fields=['balance'])
+        return self.balance
+
+
+# ---------------------------------------------------------------------------
+# Transaction
+# ---------------------------------------------------------------------------
+
+class Direction(models.TextChoices):
+    CREDIT = 'credit', 'Credit'
+    DEBIT  = 'debit',  'Debit'
+
+
+class AssignedBy(models.TextChoices):
+    USER       = 'user',       'User'        # human picked the pocket
+    SUGGESTION = 'suggestion', 'Suggestion'  # system suggested, user confirmed
+    AUTO       = 'auto',       'Auto'        # system assigned silently
+
+
+class Transaction(models.Model):
+    """
+    Every money movement — whether auto-detected from SMS or manually entered.
+    This is the single source of truth for all financial history.
+    """
+    id               = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    pocket           = models.ForeignKey(Pocket, on_delete=models.CASCADE, related_name='transactions')
+    amount           = models.PositiveIntegerField()                 # always positive; direction tells the sign
+    direction        = models.CharField(max_length=6,  choices=Direction.choices)
+    source_bank      = models.CharField(max_length=32, blank=True)  # "HBL", "MCB", "UBL", etc.
+    raw_sms          = models.TextField(blank=True)                  # original SMS body for re-parsing later
+    assigned_by      = models.CharField(max_length=16, choices=AssignedBy.choices, default=AssignedBy.USER)
+    confidence_score = models.FloatField(null=True, blank=True)      # score at time of auto/suggestion
+    note             = models.CharField(max_length=128, blank=True)  # optional user note
+    transacted_at    = models.DateTimeField()                        # when the bank says it happened
+    created_at       = models.DateTimeField(auto_now_add=True)       # when we logged it
+
     class Meta:
-        verbose_name_plural = "Salaries"
-
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    salary = models.IntegerField(validators=[MinValueValidator(0)])
-    total = models.ForeignKey(Total, on_delete=models.CASCADE)
-    def __str__(self):
-            return f"Salary saved is: {self.salary}"
-    def get_absolute_url(self):
-            from django.urls import reverse
-            return reverse('Salary', args=[str(self.uuid)]) # 'salary' is the name from the App/urls.py under path.
-
-class Saving(models.Model):
-    
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    saving = models.IntegerField(validators=[MinValueValidator(0)])
-    total = models.ForeignKey(Total, on_delete=models.CASCADE)
+        ordering = ['-transacted_at']
 
     def __str__(self):
-        return f"Saving is: {self.saving}"
-    def get_absolute_url(self):
-            from django.urls import reverse
-            return reverse('Saving', args=[str(self.uuid)]) # 'saving' is the name from the App/urls.py under path.
+        return f"{self.direction} Rs {self.amount:,} → {self.pocket.name} ({self.assigned_by})"
+
+    # ------------------------------------------------------------------
+    # Saving a transaction also updates the pocket balance atomically.
+    # ------------------------------------------------------------------
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+        if is_new:
+            self._update_pocket_balance(+1)
+
+    def delete(self, *args, **kwargs):
+        self._update_pocket_balance(-1)
+        super().delete(*args, **kwargs)
+
+    def _update_pocket_balance(self, multiplier):
+        """
+        multiplier=+1  when adding a transaction
+        multiplier=-1  when deleting / undoing one
+        """
+        delta = self.amount * multiplier
+        if self.direction == Direction.CREDIT:
+            self.pocket.balance = models.F('balance') + delta
+        else:
+            self.pocket.balance = models.F('balance') - delta
+        self.pocket.save(update_fields=['balance'])
 
 
-class Others(models.Model):
+# ---------------------------------------------------------------------------
+# PatternRule
+# ---------------------------------------------------------------------------
+
+class PatternRule(models.Model):
+    """
+    One learned pattern for a user.
+    The engine creates rows here and updates match_count + confidence
+    every time a transaction confirms the pattern.
+
+    Example row:
+        source_bank="HBL", direction="credit",
+        amount_min=1, amount_max=5000,
+        suggested_pocket=<Salary pocket>,
+        match_count=12, confidence=0.91
+    """
+    id                 = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user               = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pattern_rules')
+    suggested_pocket   = models.ForeignKey(Pocket, on_delete=models.CASCADE, related_name='pattern_rules')
+    source_bank        = models.CharField(max_length=32, blank=True)
+    direction          = models.CharField(max_length=6, choices=Direction.choices)
+    amount_min         = models.PositiveIntegerField(default=0)
+    amount_max         = models.PositiveIntegerField(default=999_999_999)
+    match_count        = models.PositiveIntegerField(default=0)
+    confirm_count      = models.PositiveIntegerField(default=0) # how many times user confirmed (not undid)
+    confidence         = models.FloatField(default=0.0)         # confirm_count / match_count
+    last_seen          = models.DateTimeField(null=True, blank=True)
+
     class Meta:
-        verbose_name_plural = "Others"
-
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    others = models.CharField(max_length=32, validators=[validateforText])
-    balance = models.IntegerField(validators=[MinValueValidator(0)])
-    total = models.ForeignKey(Total, on_delete=models.CASCADE)
+        ordering = ['-confidence', '-match_count']
 
     def __str__(self):
-        return f"Balance for {self.others} is: {self.balance}"
-    def get_absolute_url(self):
-            from django.urls import reverse
-            return reverse('Others', args=[str(self.uuid)]) # 'others' is the name from the App/urls.py under path.
+        return (
+            f"{self.source_bank} {self.direction} "
+            f"Rs {self.amount_min:,}–{self.amount_max:,} "
+            f"→ {self.suggested_pocket.name} "
+            f"(conf: {self.confidence:.0%})"
+        )
+
+    def recalculate_confidence(self):
+        if self.match_count == 0:
+            self.confidence = 0.0
+        else:
+            self.confidence = self.confirm_count / self.match_count
+        self.save(update_fields=['confidence'])
 
 
+# ---------------------------------------------------------------------------
+# DeviceToken
+# ---------------------------------------------------------------------------
+
+class Platform(models.TextChoices):
+    ANDROID = 'android', 'Android'
+    IOS     = 'ios',     'iOS'
 
 
-                            
+class DeviceToken(models.Model):
+    """
+    Stores push notification tokens per device.
+    Android uses local notifications (no token needed for basic use)
+    but storing it here keeps the table consistent for both platforms.
+    iOS requires this for APNs.
+    """
+    id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user          = models.ForeignKey(User, on_delete=models.CASCADE, related_name='device_tokens')
+    token         = models.TextField(unique=True)
+    platform      = models.CharField(max_length=8, choices=Platform.choices)
+    registered_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.platform} token for {self.user.username}"

@@ -1,69 +1,221 @@
-# Practicing
-
-# GridLayoutExample:
-        # Class rule only (<ClassName>) when Python returns instance
-        # Root rule only (ClassName:) when Python returns nothing
+# # Practicing
+#
+# # GridLayoutExample:
+#         # Class rule only (<ClassName>) when Python returns instance
+#         # Root rule only (ClassName:) when Python returns nothing
+# # <GridLayoutExample>:
+#     # rows: 2
+#     # cols:1
+#     # size_hint: (1, None) # To use width and height, size_hint must be set to None.
+#
+#     # gridlayout doesnot allow the pos_hint values in kv file. But uses the cols/rows feature. Otherwise the things wll override eachother.
+#
+#     # # height: "360dp"
+#     # Label:
+#     #     text: "Hi Grid"
+#     # Label:
+#     #     text: "Hi Grid"
+#     # Label:
+#     #     text: "Hi Grid"
+#     # Label:
+#     #     text: "Hi Grid"
+#
+#     # GridLayout:
+#     # Label:
+#     #     text: "Total Mon"
+#     # AnchorLayout:
+#     #     anchor_x: "left"
+#     #     Label:
+#     #         text: "Sal"
+#     # AnchorLayout:
+#     #     anchor_x: "right"
+#     #     Label:
+#     #         text: "Sav"
+#     # AnchorLayout:
+#     #     anchor_x: "center"
+#     #     Label:
+#     #         text: "Oth"
 # <GridLayoutExample>:
-    # rows: 2
-    # cols:1
-    # size_hint: (1, None) # To use width and height, size_hint must be set to None.
-    
-    # gridlayout doesnot allow the pos_hint values in kv file. But uses the cols/rows feature. Otherwise the things wll override eachother.
+#     rows: 4
+#     cols: 1
+#
+#     # Example 'ToggleButton'
+#     # 
+#     # ToggleButton:
+#     #     text:"Off"
+#     #     on_state: root.togglebutton(self)
+#     #
+#     #
+#     # Example 'Switch'
+#     # Switch:
+#     #     size_hint : None, None
+#     #     width: "100dp"
+#     #     height: "50dp"
+#     #     on_active: root.activeswitch(self)
+#     #
+#     #
+#     # Example 'Slider'
+#     Slider:
+#         min:10
+#         max: 90
+#         size_hint: None, 1
+#         width: "450dp"
+#         value: 30
+#         on_value: root.changeslider(self) # Or we can use the 'id'. Without the need of 'on_value'
+#         # id : sliderval
+#
+#     Label:
+#         # text: root.slider_value_txt # Or use the id 'binding' without the need of 'on_value'
+#         text: str(int(sliderval.value))
+#
+#     # Row 1: Title
+#     Label:
+#         text: root.mytotal + root.mytotalvalue + "$"
+#         size_hint_y: None
+#         height: 50
+#         on_touch_down: if self.collide_point(*args[1].pos): root.showtotal()
+# # EXPLANATION:
+# #self.collide_point(*args[1].pos)
+# #         ↑         ↑       ↑
+# #         │         │       └── Gets (x,y) position tuple from touch
+# #         │         └── Unpacks the tuple into x,y arguments
+# #         └── Checks if (x,y) is inside this widget
+#
+#     # Row 2: Three buttons with text below
+#     BoxLayout: # The box layout automatically arranges its childs to 'left', 'center' & 'right'
+#         size_hint_y: None
+#         height: 150
+#
+#         # Left button + text
+#         AnchorLayout:
+#             anchor_x: 'center'
+#             BoxLayout:
+#                 orientation: 'vertical'
+#                 size_hint: None, None
+#                 size: 150, 50 # Could use the text_length property too. For dynamic behaviour.
+#                 # Button:
+#                 #     text: "Sal"
+#                 #     size_hint_y: 0.7
+#                 #     on_press: root.showsalary()
+#                 Label:
+#                     text: root.mytotal + root.mytotalvalue + "$"
+#                     size_hint_y: 0.3
+#                     halign: 'center'
+#                     on_touch_down: if self.collide_point(*args[1].pos): root.showsalary()
+#                     canvas.after:
+#                         Color:
+#                             rgba: (1, 0, 0, 1)  # Red border
+#                         Line:
+#                             width: 2
+#                             rectangle: self.x, self.y, self.width, self.height
+#
+#         # Center button + text (same pattern)
+#         AnchorLayout:
+#             anchor_x: 'center'
+#             BoxLayout:
+#                 orientation: 'vertical'
+#                 size_hint: None, None
+#                 size: 150, 50
+#                 # Button:
+#                 #     text: "Sav"
+#                 #     size_hint_y: 0.7
+#                 #     on_press: root.showsaving()
+#                 Label:
+#                     text: root.mytotal + root.mytotalvalue + "$"
+#                     size_hint_y: 0.3
+#                     halign: 'center'
+#                     on_touch_down: if self.collide_point(*args[1].pos): root.showsaving()
+#                     canvas.after:
+#                         Color:
+#                             rgba: (1, 0, 0, 1)  # Red border
+#                         Line:
+#                             width: 2
+#                             rectangle: self.x, self.y, self.width, self.height       
+#         # Right button + text (same pattern)
+#         AnchorLayout:
+#             anchor_x: 'center'
+#             BoxLayout:
+#                 orientation: 'vertical'
+#                 size_hint: None, None
+#                 size: 150, 50
+#                 # Button:
+#                 #     text: "Oth"
+#                 #     size_hint_y: 0.7
+#                 #     on_press: root.showothers()
+#                 Label:
+#                     # text: root.myothers + root.myothersvalue + "$"
+#                     text: root.mytotal + root.mytotalvalue + "$"
+#                     size_hint_y: 0.3
+#                     halign: 'center'
+#                     on_touch_down: if self.collide_point(*args[1].pos): root.showothers()
+# <BoxLayoutExample>:
+#     orientation: 'vertical'
+#
+#     Button:
+#         text: "Login"
+#         color: (1,.5,1,1)
+#         background_color: (1,.5,1,1)
+#
+#     Label:
+#         text: "Hi Box"
+#         # size_hint: (None, None)
+#         # width: "1000dp"
+#         # height: "50dp"
+#     Label:
+#         text: "Hi Box"
+#     Label:
+#         text: "Hi Box"
+#     Label:
+#         text: "Hi Box"
+#
+#
+#
+#
+#
+#
+#
+#
+# # <MygridLayout>
+# #     GridLayout:
+# #         cols:1
+# #
+# #         GridLayout:
+# #             cols:2
+# #
+# #             Label:
+# #                 text: "Username"
+# #             TextInput:
+# #                 multiinput:False
+# #
+# #             Label:
+# #                 text: "Password"
+# #             TextInput:
+# #                 multiinput:False
+# #                 password:True
+# #     Button:
+# #         text: Login
+#
+#
+#
+#
+#
+####################### SEEING ON PHYSICAL MOBILE #################################
 
-    # # height: "360dp"
-    # Label:
-    #     text: "Hi Grid"
-    # Label:
-    #     text: "Hi Grid"
-    # Label:
-    #     text: "Hi Grid"
-    # Label:
-    #     text: "Hi Grid"
-    
-    # GridLayout:
-    # Label:
-    #     text: "Total Mon"
-    # AnchorLayout:
-    #     anchor_x: "left"
-    #     Label:
-    #         text: "Sal"
-    # AnchorLayout:
-    #     anchor_x: "right"
-    #     Label:
-    #         text: "Sav"
-    # AnchorLayout:
-    #     anchor_x: "center"
-    #     Label:
-    #         text: "Oth"
+
 <GridLayoutExample>:
     rows: 4
     cols: 1
-    
-    # Row 1: Title
+
     Label:
         text: root.mytotal + root.mytotalvalue + "$"
         size_hint_y: None
         height: 50
         on_touch_down: if self.collide_point(*args[1].pos): root.showtotal()
-# EXPLANATION:
-#self.collide_point(*args[1].pos)
-#         ↑         ↑       ↑
-#         │         │       └── Gets (x,y) position tuple from touch
-#         │         └── Unpacks the tuple into x,y arguments
-#         └── Checks if (x,y) is inside this widget
 
-
-
-
-    # Label:
-    #     text: root.mytotalvalue
-    
-    # Row 2: Three buttons with text below
-    BoxLayout: # The boc layout automatically arranges its childs to 'left', 'center' & 'right'
+    BoxLayout:
         size_hint_y: None
         height: 150
-        
-        # Left button + text
+
         AnchorLayout:
             anchor_x: 'center'
             BoxLayout:
@@ -78,8 +230,7 @@
                     text: root.mysalary
                     size_hint_y: 0.3
                     halign: 'center'
-        
-        # Center button + text (same pattern)
+
         AnchorLayout:
             anchor_x: 'center'
             BoxLayout:
@@ -94,8 +245,7 @@
                     text: root.mysaving
                     size_hint_y: 0.3
                     halign: 'center'
-        
-        # Right button + text (same pattern)
+
         AnchorLayout:
             anchor_x: 'center'
             BoxLayout:
@@ -110,49 +260,3 @@
                     text: root.myothers
                     size_hint_y: 0.3
                     halign: 'center'
-<BoxLayoutExample>:
-    orientation: 'vertical'
-
-    Button:
-        text: "Login"
-        color: (1,.5,1,1)
-        background_color: (1,.5,1,1)
-    
-    Label:
-        text: "Hi Box"
-        # size_hint: (None, None)
-        # width: "1000dp"
-        # height: "50dp"
-    Label:
-        text: "Hi Box"
-    Label:
-        text: "Hi Box"
-    Label:
-        text: "Hi Box"
-
-
-
-
-
-
-
-
-# <MygridLayout>
-#     GridLayout:
-#         cols:1
-#
-#         GridLayout:
-#             cols:2
-#
-#             Label:
-#                 text: "Username"
-#             TextInput:
-#                 multiinput:False
-#
-#             Label:
-#                 text: "Password"
-#             TextInput:
-#                 multiinput:False
-#                 password:True
-#     Button:
-#         text: Login
